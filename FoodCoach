@@ -1,0 +1,256 @@
+version=0.3
+run=True
+
+###
+
+def root():
+
+    import os
+
+    with open('config.txt','r') as config:
+        configdata = config.read()
+
+    if 'runcount=0'in configdata:start()
+    if 'runcount=1' in configdata:main()
+
+### PREMIERE UTILISATION
+
+def start():
+
+    print(('   FOOD COACH ' + str(version)+'   ').center(100,'>'))
+    print('''
+...Bonjour, laissez moi me présenter: je suis votre Food Coach... 
+...Dans ma version alpha, je suis là pour vous aider à compter vos calories, j'aurais peut-être des fonctionnalités supplémentaires dans le futur...
+...Commencons par faire connaissance...
+'''.format(version))
+
+    def alias():
+
+        print('...Comment puis-je vous appeler ?...')
+        name=input('>')
+
+        if name:
+            name=name.capitalize()
+            print('''...Souhaitez-vous que je vous appelles "{}" ?...
+>(Oui/Non)'''.format(name))
+            conf0=input('>')
+
+            if conf0.lower()=='oui':
+                print("...Très bien, "+name+""", je suis ravi de vous rencontrer...
+...Souhaitez-vous que je vous explique comment je fonctionne et comment je peux vous servir?...
+>(Oui/Non)""")
+                config=open('config.txt','r')
+                data=config.read()
+                config.close()
+
+                newdata=data.replace('runcount=0','runcount=1').replace("name=''",'name='+name)
+
+                config=open('config.txt','w')
+                config.write(newdata)
+                config.close()
+
+                conf1=input('>')
+
+                if conf1.lower()=='oui':
+                    print("""
+...Je suis un Food Coach -presque- intelligent, je comprends quelques mots...
+...Je possède un petite base de données avec quelques aliments et leurs valeurs caloriques...
+...Enrichissez-là en me demandant d'y ajouter de nouveaux aliments...
+...Par exemple: "Rajoutes "banane" à la liste d'aliments."...
+...Dites moi ce que vous avez mangé et j'essaierai de vous dire combien de calories vous avez consommé...
+...Par exemple: "J'ai mangé 1 banane et 100 grammes de steak haché."...
+...Pour obtenir de l'aide, tapez "aide"...
+""")
+                    conf2=input('...Appuyez sur la touche "Entrée" pour continuer...')
+                    print('')
+                    main()
+                else:
+                    conf3=input('...Appuyez sur la touche "Entrée" pour continuer...')
+                    print('')
+                    main()
+
+            else:alias()
+
+    alias()
+
+### MAIN
+
+def main():
+
+    if run==True:
+
+        def saysomething():
+# DICOS
+            import re
+
+            global ajout
+            global run
+
+            alimuf=open('alimu.txt','r')
+            alimu=eval(alimuf.read())
+            alimuf.close()
+
+            alimsf=open('alims.txt','r')
+            alims=eval(alimsf.read())
+            alimsf.close()
+
+            alimgf=open('alimg.txt','r')
+            alimg=eval(alimgf.read())
+            alimgf.close()
+#travailler la comprehension>>>
+            add=('ajouter', 'rajouter', 'ajout', 'rajoutes', 'ajoutes','ajoute')
+            help=['help','aide']
+            eat=('mangé','consommé','bouffé','avalé')
+            end=('aurevoir', 'bye', 'a bientot', 'à bientôt', 'salut')
+            dico=('dico', 'liste', 'base', 'donnée')
+
+            print('...Dites quelque-chose...')
+            phrase=input('>')
+#-ponctuation
+            phrase=re.sub('[,.]','',phrase)
+            phrase=phrase.split(' ') ###!SPLIT
+            #print(phrase)
+# AJOUT AU DICO
+            def aj(conf3):
+
+                global ajout
+
+                if conf3.lower()=='oui':
+                    print('''...Les calories de "{}" se comptent-elles pour 100 grammes ou par unité?...
+>(Grammes/Unité)'''.format(ajout))
+                    gu=input('>')
+
+                    if gu.lower() in ['g','gramme','grammes']:
+                        print("...Combien de calories pour 100 grammes y a-t-il dans l'aliment?...")
+                        calg=input('>')
+
+                        if calg:
+                            print('...Très bien, merci. J\'ai rajouté cette entrée à ma base de données...')
+
+                            alims.append(ajout)
+                            alimg[ajout]=calg
+                            print(alimg)
+
+                            alimsf=open('alims.txt','w')
+                            alimsf.write(str(alims))
+                            alimsf.close()
+
+                            alimgf=open('alimg.txt','w')
+                            alimgf.write(str(alimg))
+                            alimgf.close()
+
+                            saysomething()
+
+                    else:
+                        print('...Combien de calories y a-t-il dans 1 "{}"?...'.format(ajout))
+                        calu=input('>')
+                        if calu:
+                            print('...Très bien, merci. J\'ai rajouté cette entrée à ma base de données...')
+                            print('')
+
+                            alims.append(ajout)
+                            alimu[ajout]=calu
+
+                            alimsf=open('alims.txt','w')
+                            alimsf.write(str(alims))
+                            alimsf.close()
+
+                            alimuf=open('alimu.txt','w')
+                            alimuf.write(str(alimu))
+                            alimuf.close()
+
+                            saysomething()
+
+                else:
+                    print('...Que voulez-vous ajouter?...')
+                    ajout0=input('>')
+                    if ajout0:
+                        ajout=ajout0
+                        conf3='oui'
+                        aj(conf3)
+# HELP
+            if any(i.lower() in help for i in phrase):
+                print('''Dites "ajout" (ou ses synonymes dans une phrase) suivi du nom d\'un aliment pour l\'ajouter à la base de données...
+Dites "manger" (ou ses synonymes dans une phrase) pour calculer les calories que vous avez consommé...
+...Précisez les unités consommées ou le grammage sous forme de chiffres...
+Dites "dico" ou "base de données" (ou ses synonymes dans une phrase) pour afficher la liste des aliments de ma base de données...
+Dites "aurevoir" (ou ses synonymes dans une phrase) pour m\'éteindre...
+''')
+                saysomething()
+# EXIT
+            if any(i.lower() in end for i in phrase):
+                print('...Aurevoir...')
+                run=False
+# PRINT DICO
+            elif any(i.lower() in dico for i in phrase):
+                print('...Voici les aliments de ma base de données...')
+                for i in alimu:
+                    print(i +' : '+str(alimu[i])+' calories pour 1 '+i+'...')
+                for i in alimg:
+                    print(i +' : '+str(alimg[i])+' calories pour 100 grammes...')
+                print('')
+                saysomething()
+
+            elif any(i.lower() in add for i in phrase):
+                ind=[]
+# AJOUT instantané
+#+APRES EAT SI PAS DANS LA DATABASE>>>
+                for i in phrase:
+
+                    if i in add:
+                        ind.append(i.index(i))
+
+                ind=[i+1 for i in ind]
+                ajout=phrase[ind[0]]
+                print('''...Voulez-vous ajouter "{}" à ma base de données ?...
+(Oui/Non)'''.format(ajout))
+                conf3=input('>')
+                aj(conf3)
+# CONSO
+            elif any(i.lower() in eat for i in phrase):
+#pluriels
+                phrase=[i.replace('s','') if i.endswith('s') else i for i in phrase]
+
+                aliments=[i for i in phrase if i in alims]
+                quantités=[i for i in phrase if i.isnumeric()]
+#erreur si les deux listes ne sont pas de meme taille
+                if len(aliments)!=len(quantités):
+                    print('...Désolé, je n\'ai pas compris...')
+                    print('...Exprimez les quantités en chiffres et vérifiez l\'orthographe des aliments...')
+                    print('...Vous pouvez me demander d\'afficher la base de données ou le "dico"...')
+                    print('')
+                    saysomething()
+
+                else:
+                    ug=dict(zip(aliments, quantités))
+                    total=0
+                    print('...Vous avez consommé...')
+                    #print(ug)
+#Filtre si unitaire ou grammes
+                    for i in list(filter(lambda x:x in alimu, ug)):
+                        print(ug[i]+' '+i+'(s) : '+str(int(alimu[i])*int(ug[i]))+' calories...')
+                        total+=int(alimu[i])*int(ug[i])
+
+                    for i in list(filter(lambda x:x in alimg, ug)):
+                        print(ug[i]+' gramme(s) de '+i+' : '+str(int(alimg[i])*int(ug[i])//100)+' calories...')
+                        total+=int(alimg[i])*int(ug[i])/100
+
+                    print('TOTAL : '+str(int(total))+' calories...')
+                    print('')
+                    saysomething()
+
+            elif any(i.lower()=='bonjour' for i in phrase):
+                print('...Vous n\'avez rien de mieux à faire? Je ne suis pas là pour faire la conversation...')
+                print('')
+                saysomething()
+
+            else:
+                print('...Désolé, je n\'ai pas compris...')
+                print('')
+                saysomething()
+
+
+        saysomething()
+###ajouter un log>>>
+###TESTS
+print(root())
